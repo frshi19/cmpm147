@@ -24,22 +24,26 @@
     <script type="text/javascript" src="../js/site.js" DEFER></script>
 	<!-- Use me for a JavaScript OOP Project -->
 	<script type="text/javascript" src="./js/project.js" DEFER></script>
-	<!-- Use me for a p5.js project -->
-	<script type="text/javascript" src="./js/sketch.js" DEFER></script>
 </head>
 <body>
 	<!-- Style this page by changing the CSS in ../css/site.css or css/experiment.css -->
 	<main id="content">
 		<section>
 
-			<h1>Experiment X - Subject/Topic</h1>
+			<h1>Experiment 1 - Hello Glitch</h1>
 
 			<div class="minor-section">
 				<button id="clicker">
 					reroll it
 				</button>
+				<style>
+					.preserve-newline {
+					  white-space: pre-line;
+					}
+				</style>
 				<div
 					style="font-family: fantasy; border: thin solid gray; padding: 1em; margin: 1em; box-shadow: 2px 2px 5px gray; background: #ffe;"
+					class="preserve-newline"
 					id="box"
 				></div>
                 <div class="fullscreen-box">
@@ -49,17 +53,17 @@
 
 			<div class="minor-section">
 				<h2>Description</h2>
-				<p>What are you trying to acomplish with this experiment?</p>
+				<p>An item description generator for receiving a weapon. Gives a backstory to the weapon.</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Technical</h2>
-				<p>Describe in detail what you did technically and how it works?</p>
+				<p>Generates an item name and description by replacing words in a template with other words in the filler.</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Reflection</h2>
-				<p>Each person that worked on the code should reflect on the process, the difficulties, and the successes of the experiment.</p>
+				<p>I used the imitate, integrate, and innovate design process to come up with this generator. I think it turned out great, especially with how well the random words work together, although I had a lot of issues dealing with HTML's whitespace collapse and formatting the text since I am fairly new to CSS.</p>
 			</div>
 
 		</section>

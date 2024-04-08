@@ -7,20 +7,6 @@
 // Constants - User-servicable parts
 // In a longer project I like to put these in a separate file
 
-// define a class
-class MyProjectClass {
-  // constructor function
-  constructor(param1, param2) {
-    // set properties using 'this' keyword
-    this.property1 = param1;
-    this.property2 = param2;
-  }
-  
-  // define a method
-  myMethod() {
-    // code to run when method is called
-  }
-}
 
 function main() {
   const fillers = {
@@ -43,7 +29,6 @@ function main() {
   const template = `Recieved: $modifier $weapon of $trait.
   
   This weapon was $how using $method $material, truly worthy of a knight of your $status.
-  
   It is said that the legendary warrior $name of $place once $removed $number $unit during the $event in $date using this weapon.
   `;
   
@@ -67,14 +52,15 @@ function main() {
     }
   
     /* global box */
-    box.innerText = story;
+    $("#box").text(story);
   }
   
   /* global clicker */
-  clicker.onclick = generate;
+  $("#clicker").click(generate);
   
   generate();
   
 }
 
+// let's get this party started - uncomment me
 main();
