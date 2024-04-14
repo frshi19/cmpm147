@@ -15,6 +15,13 @@ let myInstance;
 let canvasContainer;
 var centerHorz, centerVert;
 
+let seed = 0;
+
+const grassColor = "#CCCB5F";
+const skyColor = "#39ACFD";
+const stoneColor = "#626C6D";
+const treeColor = "#5B7545";
+
 class MyClass {
     constructor(param1, param2) {
         this.property1 = param1;
@@ -34,8 +41,15 @@ function resizeScreen() {
   // redrawCanvas(); // Redraw everything based on new size
 }
 
+// listener for reimagine button
+$("#reimagine").click(function() {
+  seed++;
+});
+
 // setup() function is called once when the program starts
 function setup() {
+  createCanvas(400, 200);
+  
   // place our canvas, making it fit our container
   canvasContainer = $("#canvas-container");
   let canvas = createCanvas(canvasContainer.width(), canvasContainer.height());
@@ -53,24 +67,37 @@ function setup() {
 
 // draw() function is called repeatedly, it's the main animation loop
 function draw() {
-  background(220);    
-  // call a method on the instance
-  myInstance.myMethod();
+  randomSeed(seed);
 
-  // Set up rotation for the rectangle
-  push(); // Save the current drawing context
-  translate(centerHorz, centerVert); // Move the origin to the rectangle's center
-  rotate(frameCount / 100.0); // Rotate by frameCount to animate the rotation
-  fill(234, 31, 81);
+  background(100);
+
   noStroke();
-  rect(-125, -125, 250, 250); // Draw the rectangle centered on the new origin
-  pop(); // Restore the original drawing context
 
-  // The text is not affected by the translate and rotate
-  fill(255);
-  textStyle(BOLD);
-  textSize(140);
-  text("p5*", centerHorz - 105, centerVert + 40);
+  
+  fill(skyColor);
+  rect(0, 0, width, height / 3  * 2);
+  
+  fill(grassColor);
+  rect(0, height / 3  * 2, width, height / 3  * 2);
+  
+  fill(stoneColor);
+  beginShape();
+  vertex(width/4, height / 3  * 2);
+  vertex(width/4 + 50 + random() * 25, 20 + random() * 10);
+  vertex(width/4*3 - 50 + random() * 25, 20 + random() * 10);
+  vertex(width/4*3 + random() * 50, height / 3  * 2);
+  endShape(CLOSE);
+
+  fill(treeColor);
+  const trees = 400*random();
+  const scrub = mouseX/width;
+  for (let i = 0; i < trees; i++) {
+    let z = random();
+    let x = width * ((random() + (scrub/50 + millis() / 500000.0) / z) % 1);
+    let s = width / 50 / z;
+    let y = height / 3  * 2 + height / 20 / z;
+    triangle(x, y - s, x - s / 4, y, x + s / 4, y);
+  }
 }
 
 // mousePressed() function is called once after every time a mouse button is pressed
