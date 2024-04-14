@@ -19,7 +19,7 @@ let seed = 0;
 
 const grassColor = "#CCCB5F";
 const skyColor = "#39ACFD";
-const stoneColor = "#626C6D";
+let stoneColor = "#626C6D";
 const treeColor = "#5B7545";
 
 class MyClass {
@@ -43,7 +43,7 @@ function resizeScreen() {
 
 // listener for reimagine button
 $("#reimagine").click(function() {
-  seed++;
+  seed = millis();
 });
 
 // setup() function is called once when the program starts
@@ -73,26 +73,32 @@ function draw() {
 
   noStroke();
 
-  
   fill(skyColor);
   rect(0, 0, width, height / 3  * 2);
   
   fill(grassColor);
   rect(0, height / 3  * 2, width, height / 3  * 2);
-  
-  fill(stoneColor);
+ 
+  fill(stoneColor)
   beginShape();
-  vertex(width/4, height / 3  * 2);
-  vertex(width/4 + 50 + random() * 25, 20 + random() * 10);
-  vertex(width/4*3 - 50 + random() * 25, 20 + random() * 10);
-  vertex(width/4*3 + random() * 50, height / 3  * 2);
+  const scrub = mouseX/width;
+  vertex(width/3 + random() * width/20, height / 3  * 2);
+
+  vertex(width/3 + random() * width/20 + width/20, height / 7 * 4);
+
+  vertex(width/3 + random() * width/20 + width/10, height/10 + random() * height/20);
+  vertex(width/3*2 - random() * width/20 - width/10 , height/10 + random() * height/20);
+
+  vertex(width/3*2 - random() * width/20 - width/20 , height / 7 * 4);
+
+  vertex(width/3*2 - random() * width/20, height / 3  * 2);
   endShape(CLOSE);
 
   fill(treeColor);
   const trees = 400*random();
-  const scrub = mouseX/width;
+  
   for (let i = 0; i < trees; i++) {
-    let z = random();
+    let z = .1 + random();
     let x = width * ((random() + (scrub/50 + millis() / 500000.0) / z) % 1);
     let s = width / 50 / z;
     let y = height / 3  * 2 + height / 20 / z;
