@@ -75,6 +75,18 @@ function draw() {
 
   fill(skyColor);
   rect(0, 0, width, height / 3  * 2);
+
+  // clouds
+  fill("#EEEEEE")
+  const clouds = 20;
+  for (let i = 0; i < clouds; i++) {
+    let z = 1 + random();
+    let x = width * ((random() + millis() / 400000.0) / z) % width;
+    let y = height / 2 + height / 10 * random();
+    let s = width / 10 / z; // Adjust size based on z
+    ellipse(x, y, s, s / 2); // Ellipse shape for clouds
+  }
+  
   
   fill(grassColor);
   rect(0, height / 3  * 2, width, height / 3  * 2);
