@@ -31,7 +31,7 @@ function preload() {
 }
 
 function reseed() {
-  seed = (seed | 0) + 1109;
+  seed = (seed | 0) + millis();
   randomSeed(seed);
   noiseSeed(seed);
   select("#seedReport").html("seed " + seed);
@@ -69,15 +69,74 @@ function stringToGrid(str) {
   return grid;
 }
 
+function gridCheck(grid, i, j, target) {
+  if (i >= 0 && i < grid.length && j >= 0 && j < grid[i].length) {
+    return grid[i][j] == target;
+  }
+  return false;
+}
+
+function gridCode(grid, i, j, target) {
+  const northBit = gridCheck(grid, i - 1, j, target) ? 1 : 0;
+  const southBit = gridCheck(grid, i + 1, j, target) ? 1 : 0;
+  const eastBit = gridCheck(grid, i, j + 1, target) ? 1 : 0;
+  const westBit = gridCheck(grid, i, j - 1, target) ? 1 : 0;
+  
+  return (northBit << 0) + (southBit << 1) + (eastBit << 2) + (westBit << 3);
+}
+
+
+function drawContext(grid, i, j, target, ti, tj) {
+  const code = gridCode(grid, i, j, target);
+  const [tiOffset, tjOffset] = lookup[code];
+  placeTile(i, j, ti + tiOffset, tj + tjOffset);
+}
+
+const lookup = [
+  [0 , -14], // NSEW
+  [10, -12], // 1 SEW
+  [10, -14], // 2 NEW
+  [0 , 0], // 3 EW
+  [9, -13], // 4 NSW
+
+  [9, -12], // 5 SW
+  [9, -14], // 6 SE
+  [9, -13], // 7 W
+
+  [11, -13], // 8 NES
+
+  [11, -12], // 9 SE
+  [11, -14], // 10 NE
+  [11, -13], // 11 E
+
+  [0, 0], // 12 NS
+
+  [10, -12], // 13 S
+  [10, -14], // 14 N
+  
+  [0, 0]  // 15 
+];
+
 /* exported generateGrid, drawGrid */
 /* global placeTile */
 
 function generateGrid(numCols, numRows) {
   let grid = [];
+  let noiseScale = .035;
+  let n;
   for (let i = 0; i < numRows; i++) {
     let row = [];
     for (let j = 0; j < numCols; j++) {
-      row.push("_");
+      n = floor(100 * noise(i * noiseScale, j * noiseScale));
+      if (n < 40) {
+        row.push(".");
+      }
+      else if (n >= 40 && n < 65) {
+        row.push("_");
+      }
+      else if (n >= 65){
+        row.push("W")
+      }
     }
     grid.push(row);
   }
@@ -91,7 +150,36 @@ function drawGrid(grid) {
   for(let i = 0; i < grid.length; i++) {
     for(let j = 0; j < grid[i].length; j++) {
       if (grid[i][j] == '_') {
-        placeTile(i, j, (floor(random(4))), 0);
+        if (gridCheck(grid, i, j, "_")) {
+          if (random(1) < 0.95) {
+            placeTile(i, j, 0, 0);
+          }
+          else {
+            placeTile(i, j, 1 + floor(random(3)), 0);
+          }
+        } else {
+          //drawContext(grid, i, j, "_", 0, 0);
+        }
+      }
+      else if (grid[i][j] == '.'){
+        if (gridCheck(grid, i, j, ".")) {
+          if (random(1) < 0.98) {
+            placeTile(i, j, 0, 1);
+          }
+          else {
+            placeTile(i, j, 1 + floor(random(3)), 1);
+          }
+        } else {
+          //drawContext(grid, i, j, ".", 0, 0);
+        }
+      }
+      else if (grid[i][j] == 'W'){
+        if (gridCheck(grid, i, j, "W")) {
+          placeTile(i, j, 0, 14);
+          drawContext(grid, i, j, "W", 0, 14);
+        } else {
+          drawContext(grid, i, j, "W", 0, 14);
+        }
       }
     }
   }
