@@ -88,53 +88,99 @@ function gridCode(grid, i, j, target) {
 
 function drawContext(grid, i, j, target, ti, tj) {
   const code = gridCode(grid, i, j, target);
-  const [tiOffset, tjOffset] = lookup[code];
+  let tiOffset;
+  let tjOffset;
+  if (target == "W") {
+    [tiOffset, tjOffset] = lookup[code];
+  }
+  else if (target == "T") {
+    [tiOffset, tjOffset] = lookupTree[code];
+  }
   placeTile(i, j, ti + tiOffset, tj + tjOffset);
 }
 
 const lookup = [
-  [0 , -14], // NSEW
-  [10, -12], // 1 SEW
-  [10, -14], // 2 NEW
+  [0 , -13], // NSEW
+  [10, -11], // 1 SEW
+  [10, -13], // 2 NEW
   [0 , 0], // 3 EW
-  [9, -13], // 4 NSW
+  [9, -12], // 4 NSW
 
-  [9, -12], // 5 SW
-  [9, -14], // 6 SE
-  [9, -13], // 7 W
+  [9, -11], // 5 SW
+  [9, -13], // 6 NW
+  [9, -12], // 7 W
 
-  [11, -13], // 8 NES
+  [11, -12], // 8 NES
 
-  [11, -12], // 9 SE
-  [11, -14], // 10 NE
-  [11, -13], // 11 E
+  [11, -11], // 9 SE
+  [11, -13], // 10 NE
+  [11, -12], // 11 E
 
   [0, 0], // 12 NS
 
-  [10, -12], // 13 S
-  [10, -14], // 14 N
+  [10, -11], // 13 S
+  [10, -13], // 14 N
   
+  [0, 4]  // 15 
+];
+
+const lookupTree = [
+  [-2, -1], // NSEW
+  [0, 1], // 1 SEW
+  [0, -1], // 2 NEW
+  [-2, -1], // 3 EW
+  [-1, 0], // 4 NSW
+  [-1, 1], // 5 SW
+
+  [-1, -1], // 6 NW
+
+  [-1, 0], // 7 W
+  [1, 0], // 8 NES
+
+  [1, 1], // 9 SE
+  
+  [1, -1], // 10 NE
+  [1, 0], // 11 E
+  [-2, -1], // 12 NS
+  [0, 1], // 13 S
+  [0, -1], // 14 N
   [0, 0]  // 15 
 ];
 
 /* exported generateGrid, drawGrid */
 /* global placeTile */
 
+// _ = grass
+// . = darker grass
+// W = water
+// T = trees
+// H = houses
+
 function generateGrid(numCols, numRows) {
   let grid = [];
-  let noiseScale = .035;
+  let noiseScale = .07;
   let n;
   for (let i = 0; i < numRows; i++) {
     let row = [];
     for (let j = 0; j < numCols; j++) {
-      n = floor(100 * noise(i * noiseScale, j * noiseScale));
-      if (n < 40) {
-        row.push(".");
+      n = floor(1000 * noise(i * noiseScale, j * noiseScale));
+      if (n < 400) {
+        if (n >= 170 && n < 250) {
+          row.push("T")
+        }
+        else {
+          row.push(".");
+        }
       }
-      else if (n >= 40 && n < 65) {
-        row.push("_");
+      else if (n >= 400 && n < 650) {
+        if (n >= 500 && n < 502) {
+          row.push("H")
+        }
+        else {
+          row.push("_");
+        }
       }
-      else if (n >= 65){
+      else if (n >= 650){
         row.push("W")
       }
     }
@@ -173,12 +219,45 @@ function drawGrid(grid) {
           //drawContext(grid, i, j, ".", 0, 0);
         }
       }
-      else if (grid[i][j] == 'W'){
+      else if (grid[i][j] == "W"){
         if (gridCheck(grid, i, j, "W")) {
-          placeTile(i, j, 0, 14);
-          drawContext(grid, i, j, "W", 0, 14);
+          if (random(1) < 0.95) {
+            placeTile(i, j, 0, 13);
+          }
+          else {
+            placeTile(i, j, 1 + floor(random(3)), 13);
+          }
+          drawContext(grid, i, j, "W", 0, 13);
         } else {
-          drawContext(grid, i, j, "W", 0, 14);
+          drawContext(grid, i, j, "W", 0, 13);
+        }
+      }
+      else if (grid[i][j] == "T"){
+        if (gridCheck(grid, i, j, "T")) {
+          if (random(1) < 0.98) {
+            placeTile(i, j, 0, 1);
+          }
+          else {
+            placeTile(i, j, 1 + floor(random(3)), 1);
+          }
+          drawContext(grid, i, j, "T", 16, 1);
+        } else {
+          //drawContext(grid, i, j, ".", 0, 0);
+        }
+      }
+      else if (grid[i][j] == "H"){
+        if (gridCheck(grid, i, j, "H")) {
+
+          if (random(1) < 0.95) {
+            placeTile(i, j, 0, 0);
+          }
+          else {
+            placeTile(i, j, 1 + floor(random(3)), 0);
+          }
+
+          placeTile(i, j, 26, floor(random(4)));
+        } else {
+          //drawContext(grid, i, j, ".", 0, 0);
         }
       }
     }
