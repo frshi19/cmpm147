@@ -19,6 +19,8 @@ var centerHorz, centerVert;
 
 /* global generateGrid drawGrid */
 
+let rooms = [];
+let map = 0;
 let seed = 0;
 let tilesetImage;
 let currentGrid = [];
@@ -30,11 +32,25 @@ function preload() {
   );
 }
 
+function remap() {
+  if (map == 0) {
+    map = 1;
+  }
+  else {
+    map = 0;
+  }
+  reseed();
+}
+
+$("#switch").click(function() {
+
+});
+
 function reseed() {
   seed = (seed | 0) + millis();
   randomSeed(seed);
   noiseSeed(seed);
-  select("#seedReport").html("seed " + seed);
+  select("#seedReport").html("seed: " + seed);
   regenerateGrid();
 }
 
@@ -112,6 +128,22 @@ function drawContextNight(grid, i, j, target, ti, tj) {
   placeTile(i, j, ti + tiOffset, tj + tjOffset);
 }
 
+function drawContextDungeon(grid, i, j, target, ti, tj) {
+  const code = gridCode(grid, i, j, target);
+  let tiOffset;
+  let tjOffset;
+  if (target == "*") {
+    [tiOffset, tjOffset] = lookupDungeon[code];
+  }
+  else if (target == "+") {
+    [tiOffset, tjOffset] = lookupWalls[code];
+  }
+  else if (target == "d") {
+    [tiOffset, tjOffset] = lookupNull[code];
+  }
+  placeTile(i, j, ti + tiOffset, tj + tjOffset);
+}
+
 const lookup = [
   [0 , -13], // NSEW
   [10, -11], // 1 SEW
@@ -185,6 +217,63 @@ const lookupNight = [
   [0, 3]  // 15 
 ];
 
+const lookupWalls = [
+  [0, 0] , // NSEW
+  [0, 0] , // 1 SEW
+  [0, 0] , // 2 NEW
+  [0 , 0], // 3 EW
+  [0, 0] , // 4 NSW
+  [0, 0] , // 5 SW
+  [0, 0] , // 6 NW
+  [0, 0] , // 7 W
+  [0, 0] , // 8 NES
+  [0, 0] , // 9 SE
+  [0, 0] , // 10 NE
+  [0, 0] , // 11 E
+  [1, 1], // 12 NS
+  [1, 1] , // 13 S
+  [0, 0] , // 14 N
+  [0, 0]  // 15 
+];
+
+const lookupDungeon = [
+  [0, 0] , // NSEW
+  [0, 0] , // 1 SEW
+  [0, 0] , // 2 NEW
+  [0 , 0], // 3 EW
+  [0, 0] , // 4 NSW
+  [0, 0] , // 5 SW
+  [0, 0] , // 6 NW
+  [0, 0] , // 7 W
+  [0, 0] , // 8 NES
+  [0, 0] , // 9 SE
+  [0, 0] , // 10 NE
+  [0, 0] , // 11 E
+  [0, 0], // 12 NS
+  [0, 0] , // 13 S
+  [0, 0] , // 14 N
+  [0, 0]  // 15 
+];
+
+const lookupNull = [
+  [0, 0] , // NSEW
+  [0, 0] , // 1 SEW
+  [0, 0] , // 2 NEW
+  [0 , 0], // 3 EW
+  [0, 0] , // 4 NSW
+  [0, 0] , // 5 SW
+  [0, 0] , // 6 NW
+  [0, 0] , // 7 W
+  [0, 0] , // 8 NES
+  [0, 0] , // 9 SE
+  [0, 0] , // 10 NE
+  [0, 0] , // 11 E
+  [0, 0], // 12 NS
+  [0, 0] , // 13 S
+  [0, 0] , // 14 N
+  [0, 0]  // 15 
+];
+
 /* exported generateGrid, drawGrid */
 /* global placeTile */
 
@@ -193,37 +282,104 @@ const lookupNight = [
 // W = water
 // T = trees
 // H = houses
+function generateRoom(){
+  let roomWidth = 6 + floor(random() * 6);
+  let roomHeight = 3 + floor(random() * 6);
+  let roomCornerX = floor(random() * (numCols - roomWidth));
+  let roomCornerY = floor(random() * (numRows - roomHeight));
+  
+  // Check if the new room overlaps with existing rooms
+  let overlap = false;
+  for (let room of rooms) {
+    if (roomCornerX < room.x + room.width &&
+        roomCornerX + roomWidth > room.x &&
+        roomCornerY < room.y + room.height &&
+        roomCornerY + roomHeight > room.y) {
+      overlap = true;
+      break;
+    }
+  }
+  
+  // If there's no overlap, add the room to the list and grid
+  if (!overlap) {
+    let room = {x: roomCornerX, y: roomCornerY, width: roomWidth, height: roomHeight};
+    rooms.push(room);
+  } else {
+    // If there's overlap, try generating another room
+    generateRoom();
+  }
+}
 
 function generateGrid(numCols, numRows) {
   let grid = [];
-  let noiseScale = .07;
-  let n;
-  for (let i = 0; i < numRows; i++) {
-    let row = [];
-    for (let j = 0; j < numCols; j++) {
-      n = floor(1000 * noise(i * noiseScale, j * noiseScale));
-      if (n < 400) {
-        if (n >= 170 && n < 250) {
-          row.push("T")
+  if (map == 0){
+    // overworld
+    let noiseScale = .07;
+    let n;
+    for (let i = 0; i < numRows; i++) {
+      let row = [];
+      for (let j = 0; j < numCols; j++) {
+        n = floor(1000 * noise(i * noiseScale, j * noiseScale));
+        if (n < 400) {
+          if (n >= 170 && n < 250) {
+            row.push("T")
+          }
+          else {
+            row.push(".");
+          }
         }
-        else {
-          row.push(".");
+        else if (n >= 400 && n < 650) {
+          if (n >= 500 && n < 502) {
+            row.push("H")
+          }
+          else {
+            row.push("_");
+          }
+        }
+        else if (n >= 650){
+          row.push("W")
         }
       }
-      else if (n >= 400 && n < 650) {
-        if (n >= 500 && n < 502) {
-          row.push("H")
-        }
-        else {
-          row.push("_");
-        }
-      }
-      else if (n >= 650){
-        row.push("W")
-      }
+      grid.push(row);
     }
-    grid.push(row);
   }
+  else {
+   //dungeon
+   rooms = [];
+   for (let i = 0; i < 3 + floor(random()*5); i++) {
+    generateRoom();
+  }
+
+    for (let i = 0; i < numRows; i++) {
+      let row = [];
+      for (let j = 0; j < numCols; j++) {
+        let isRoom = false;
+        let isDoor = false;
+        for (let room of rooms){
+          if(i > room.y && i < room.y + room.height && j > room.x && j < room.x + room.width){
+            isRoom = true;
+          }
+          if ((i == room.y + floor(room.height/2) && j == room.x) || (i == room.y && j == room.x + floor(room.width/2)) || (i == room.y + floor(room.height/2) && j == room.x + room.width) || (i == room.y + room.height && j == room.x + floor(room.width/2))){
+            isDoor = true;
+          }
+        }
+        if (isDoor){
+          row.push("d")
+        }
+        else if (isRoom){
+          row.push("*")
+        }
+        else {
+          row.push("+")
+        }
+
+
+
+      }
+      grid.push(row);
+    }
+  }
+  
   
   return grid;
 }
@@ -233,144 +389,174 @@ function drawGrid(grid) {
 
   for(let i = 0; i < grid.length; i++) {
     for(let j = 0; j < grid[i].length; j++) {
-      if (millis() % 12000 < 6000) {
-        // day time
-        if (grid[i][j] == '_') {
-          if (gridCheck(grid, i, j, "_")) {
-            if (random(1) < 0.95) {
-              placeTile(i, j, 0, 0);
+      if(map == 0) {
+        //overworld
+        if (millis() % 12000 < 6000) {
+          // day time
+          if (grid[i][j] == '_') {
+            if (gridCheck(grid, i, j, "_")) {
+              if (random(1) < 0.95) {
+                placeTile(i, j, 0, 0);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 0);
+              }
+            } else {
+              //drawContext(grid, i, j, "_", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 0);
-            }
-          } else {
-            //drawContext(grid, i, j, "_", 0, 0);
           }
-        }
-        else if (grid[i][j] == '.'){
-          if (gridCheck(grid, i, j, ".")) {
-            if (random(1) < 0.98) {
-              placeTile(i, j, 0, 1);
+          else if (grid[i][j] == '.'){
+            if (gridCheck(grid, i, j, ".")) {
+              if (random(1) < 0.98) {
+                placeTile(i, j, 0, 1);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 1);
+              }
+            } else {
+              //drawContext(grid, i, j, ".", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 1);
-            }
-          } else {
-            //drawContext(grid, i, j, ".", 0, 0);
           }
-        }
-        else if (grid[i][j] == "W"){
-          if (gridCheck(grid, i, j, "W")) {
-            if (random(1) < 0.95) {
-              placeTile(i, j, 0, 13);
+          else if (grid[i][j] == "W"){
+            if (gridCheck(grid, i, j, "W")) {
+              if (random(1) < 0.95) {
+                placeTile(i, j, 0, 13);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 13);
+              }
+              drawContext(grid, i, j, "W", 0, 13);
+            } else {
+              drawContext(grid, i, j, "W", 0, 13);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 13);
-            }
-            drawContext(grid, i, j, "W", 0, 13);
-          } else {
-            drawContext(grid, i, j, "W", 0, 13);
           }
-        }
-        else if (grid[i][j] == "T"){
-          if (gridCheck(grid, i, j, "T")) {
-            if (random(1) < 0.98) {
-              placeTile(i, j, 0, 1);
+          else if (grid[i][j] == "T"){
+            if (gridCheck(grid, i, j, "T")) {
+              if (random(1) < 0.98) {
+                placeTile(i, j, 0, 1);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 1);
+              }
+              drawContext(grid, i, j, "T", 16, 1);
+            } else {
+              //drawContext(grid, i, j, ".", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 1);
-            }
-            drawContext(grid, i, j, "T", 16, 1);
-          } else {
-            //drawContext(grid, i, j, ".", 0, 0);
           }
-        }
-        else if (grid[i][j] == "H"){
-          if (gridCheck(grid, i, j, "H")) {
-  
-            if (random(1) < 0.95) {
-              placeTile(i, j, 0, 0);
+          else if (grid[i][j] == "H"){
+            if (gridCheck(grid, i, j, "H")) {
+    
+              if (random(1) < 0.95) {
+                placeTile(i, j, 0, 0);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 0);
+              }
+    
+              placeTile(i, j, 26, floor(random(4)));
+            } else {
+              //drawContext(grid, i, j, ".", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 0);
-            }
-  
-            placeTile(i, j, 26, floor(random(4)));
-          } else {
-            //drawContext(grid, i, j, ".", 0, 0);
           }
-        }
-      } else {
-        // night time
-        if (grid[i][j] == '_') {
-          if (gridCheck(grid, i, j, "_")) {
-            if (random(1) < 0.95) {
-              placeTile(i, j, 0, 6);
+        } else {
+          // night time
+          if (grid[i][j] == '_') {
+            if (gridCheck(grid, i, j, "_")) {
+              if (random(1) < 0.95) {
+                placeTile(i, j, 0, 6);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 6);
+              }
+            } else {
+              //drawContext(grid, i, j, "_", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 6);
-            }
-          } else {
-            //drawContext(grid, i, j, "_", 0, 0);
           }
-        }
-        else if (grid[i][j] == '.'){
-          if (gridCheck(grid, i, j, ".")) {
-            if (random(1) < 0.98) {
-              placeTile(i, j, 0, 7);
+          else if (grid[i][j] == '.'){
+            if (gridCheck(grid, i, j, ".")) {
+              if (random(1) < 0.98) {
+                placeTile(i, j, 0, 7);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 7);
+              }
+            } else {
+              //drawContext(grid, i, j, ".", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 7);
-            }
-          } else {
-            //drawContext(grid, i, j, ".", 0, 0);
           }
-        }
-        else if (grid[i][j] == "W"){
-          if (gridCheck(grid, i, j, "W")) {
-            if (random(1) < 0.95) {
-              placeTile(i, j, 0, 14);
+          else if (grid[i][j] == "W"){
+            if (gridCheck(grid, i, j, "W")) {
+              if (random(1) < 0.95) {
+                placeTile(i, j, 0, 14);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 14);
+              }
+              drawContextNight(grid, i, j, "W", 0, 14);
+            } else {
+              drawContextNight(grid, i, j, "W", 0, 14);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 14);
-            }
-            drawContextNight(grid, i, j, "W", 0, 14);
-          } else {
-            drawContextNight(grid, i, j, "W", 0, 14);
           }
-        }
-        else if (grid[i][j] == "T"){
-          if (gridCheck(grid, i, j, "T")) {
-            if (random(1) < 0.98) {
-              placeTile(i, j, 0, 7);
+          else if (grid[i][j] == "T"){
+            if (gridCheck(grid, i, j, "T")) {
+              if (random(1) < 0.98) {
+                placeTile(i, j, 0, 7);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 7);
+              }
+              drawContext(grid, i, j, "T", 16, 7);
+            } else {
+              //drawContext(grid, i, j, ".", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 7);
-            }
-            drawContext(grid, i, j, "T", 16, 7);
-          } else {
-            //drawContext(grid, i, j, ".", 0, 0);
           }
-        }
-        else if (grid[i][j] == "H"){
-          if (gridCheck(grid, i, j, "H")) {
-  
-            if (random(1) < 0.95) {
-              placeTile(i, j, 0, 6);
+          else if (grid[i][j] == "H"){
+            if (gridCheck(grid, i, j, "H")) {
+    
+              if (random(1) < 0.95) {
+                placeTile(i, j, 0, 6);
+              }
+              else {
+                placeTile(i, j, 1 + floor(random(3)), 6);
+              }
+    
+              placeTile(i, j, 26, floor(random(4)));
+            } else {
+              //drawContext(grid, i, j, ".", 0, 0);
             }
-            else {
-              placeTile(i, j, 1 + floor(random(3)), 6);
-            }
-  
-            placeTile(i, j, 26, floor(random(4)));
-          } else {
-            //drawContext(grid, i, j, ".", 0, 0);
           }
         }
       }
-
-
-      
+      else {
+        //dungeon
+        if (grid[i][j] == '*') {
+          if (gridCheck(grid, i, j, "*")) {
+            if (random(1) < 0.85) {
+              placeTile(i, j, 10, 23);
+            }
+            else {
+              placeTile(i, j, 11 + floor(random() * 3), 23 + floor(random() * 1));
+            }
+          } else {
+            //drawContext(grid, i, j, "_", 0, 0);
+          }
+        }
+        else if (grid[i][j] == '+'){
+          if (gridCheck(grid, i, j, "+")) {
+            drawContextDungeon(grid, i, j, "+", 0, 23);
+          } else {
+            //drawContext(grid, i, j, "_", 0, 0);
+          }
+        }
+        else if (grid[i][j] == 'd'){
+          if (gridCheck(grid, i, j, "d")) {
+            placeTile(i, j, 10, 23);
+            drawContextDungeon(grid, i, j, "d", 5, 25 + floor(random() * 3));
+          } else {
+            //drawContext(grid, i, j, "_", 0, 0);
+          }
+        }
+      }
     }
   }
 }
@@ -421,6 +607,7 @@ function setup() {
 
   select("#reseedButton").mousePressed(reseed);
   select("#asciiBox").input(reparseGrid);
+  select("#switch").mousePressed(remap);
 
   reseed();
 }
@@ -430,39 +617,45 @@ function draw() {
   randomSeed(seed);
   drawGrid(currentGrid);
 
-  noStroke()
-  // clouds
-  fill(0, 0, 0, 20 + random() * 40)
-  const clouds = floor(24 * random());
-  for (let i = 0; i < clouds; i++) {
-    let z = .5 + random();
-    let x = width * ((random() + millis() / 4000.0) / z) % width;
-    let y = height * random();
-    let s = width / 5 * z; // Adjust size based on z
-    rect(x, y, s, s / 2); // Ellipse shape for clouds
+  if (map == 0) {
+    noStroke()
+    // clouds
+    fill(0, 0, 0, 20 + random() * 40)
+    const clouds = floor(24 * random());
+    for (let i = 0; i < clouds; i++) {
+      let z = .5 + random();
+      let x = width * ((random() + millis() / 4000.0) / z) % width;
+      let y = height * random();
+      let s = width / 5 * z; // Adjust size based on z
+      rect(x, y, s, s / 2); // Ellipse shape for clouds
+    }
+  
+    let defaultColorDay = color(0,0,0,75);
+    let dayColor = color(255, 255, 255, 50); // Light blue
+    let defaultColorNight = color(255, 255, 255, 25);
+    let nightColor = color(0, 0, 0, 150); // Dark blue
+    let currentColor;
+  
+    if (millis() % 12000 < 2000) {
+      currentColor = lerpColor(defaultColorDay, dayColor, (millis() % 2000) / 2000);
+    } else if (millis() % 12000 < 4000) {
+      currentColor = lerpColor(dayColor, dayColor, (millis() % 2000) / 2000);
+    } else if (millis() % 12000 < 6000) {
+      currentColor = lerpColor(dayColor, defaultColorDay, (millis() % 2000) / 2000);
+    } else if (millis() % 12000 < 8000) {
+      currentColor = lerpColor(defaultColorNight, nightColor, (millis() % 2000) / 2000);
+    } else if (millis() % 12000 < 10000) {
+      currentColor = lerpColor(nightColor, nightColor, (millis() % 2000) / 2000);
+    } else {
+      currentColor = lerpColor(nightColor, defaultColorNight, (millis() % 2000) / 2000);
+    }
+  
+    background(currentColor)
   }
-
-  let defaultColorDay = color(0,0,0,50);
-  let dayColor = color(255, 255, 255, 50); // Light blue
-  let defaultColorNight = color(255, 255, 255, 25);
-  let nightColor = color(0, 0, 0, 150); // Dark blue
-  let currentColor;
-
-  if (millis() % 12000 < 2000) {
-    currentColor = lerpColor(defaultColorDay, dayColor, (millis() % 2000) / 2000);
-  } else if (millis() % 12000 < 4000) {
-    currentColor = lerpColor(dayColor, dayColor, (millis() % 2000) / 2000);
-  } else if (millis() % 12000 < 6000) {
-    currentColor = lerpColor(dayColor, defaultColorDay, (millis() % 2000) / 2000);
-  } else if (millis() % 12000 < 8000) {
-    currentColor = lerpColor(defaultColorNight, nightColor, (millis() % 2000) / 2000);
-  } else if (millis() % 12000 < 10000) {
-    currentColor = lerpColor(nightColor, nightColor, (millis() % 2000) / 2000);
-  } else {
-    currentColor = lerpColor(nightColor, defaultColorNight, (millis() % 2000) / 2000);
+  else {
+    
   }
-
-  background(currentColor)
+  
 }
 
 function placeTile(i, j, ti, tj) {
