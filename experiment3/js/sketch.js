@@ -614,13 +614,14 @@ function setup() {
 
 // draw() function is called repeatedly, it's the main animation loop
 function draw() {
-  randomSeed(seed);
+  
   drawGrid(currentGrid);
+  randomSeed(seed);
 
   if (map == 0) {
     noStroke()
     // clouds
-    fill(0, 0, 0, 20 + random() * 40)
+    fill(0, 0, 0, 20 + random(40) * 0)
     const clouds = floor(24 * random());
     for (let i = 0; i < clouds; i++) {
       let z = .5 + random();
