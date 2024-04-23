@@ -25,6 +25,8 @@ let seed = 0;
 let tilesetImage;
 let currentGrid = [];
 let numRows, numCols;
+let monsterX;
+let monsterY;
 
 function preload() {
   tilesetImage = loadImage(
@@ -223,17 +225,17 @@ const lookupWalls = [
   [0, 0] , // 2 NEW
   [0 , 0], // 3 EW
   [0, 0] , // 4 NSW
-  [0, 0] , // 5 SW
+  [1, 1] , // 5 SW
   [0, 0] , // 6 NW
   [0, 0] , // 7 W
   [0, 0] , // 8 NES
-  [0, 0] , // 9 SE
+  [1, 1] , // 9 SE
   [0, 0] , // 10 NE
   [0, 0] , // 11 E
   [1, 1], // 12 NS
   [1, 1] , // 13 S
   [0, 0] , // 14 N
-  [0, 0]  // 15 
+  [0, 1]  // 15 
 ];
 
 const lookupDungeon = [
@@ -344,11 +346,11 @@ function generateGrid(numCols, numRows) {
     }
   }
   else {
-   //dungeon
-   rooms = [];
-   for (let i = 0; i < 3 + floor(random()*5); i++) {
+    //dungeon
+    rooms = [];
+    for (let i = 0; i < 3 + floor(random()*5); i++) {
     generateRoom();
-  }
+    }
 
     for (let i = 0; i < numRows; i++) {
       let row = [];
@@ -376,6 +378,12 @@ function generateGrid(numCols, numRows) {
 
 
       }
+      let t1 = rooms[0]
+      let t2 = rooms[0]
+    
+      monsterX = t1.x * 16 + floor(t1.width/2)*16
+      monsterY = t2.y * 16 + floor(t2.height/2)*16
+      
       grid.push(row);
     }
   }
@@ -534,6 +542,9 @@ function drawGrid(grid) {
             if (random(1) < 0.85) {
               placeTile(i, j, 10, 23);
             }
+            else if (random(1) > 0.90){
+              placeTile(i, j, floor(random() * 5), 28 + floor(random() * 2));
+            }
             else {
               placeTile(i, j, 11 + floor(random() * 3), 23 + floor(random() * 1));
             }
@@ -543,6 +554,12 @@ function drawGrid(grid) {
         }
         else if (grid[i][j] == '+'){
           if (gridCheck(grid, i, j, "+")) {
+            if (random(1) < 0.99) {
+              placeTile(i, j, 0, 23);
+            }
+            else {
+              placeTile(i, j, 1 + floor(random() * 3), 22);
+            }
             drawContextDungeon(grid, i, j, "+", 0, 23);
           } else {
             //drawContext(grid, i, j, "_", 0, 0);
@@ -551,7 +568,7 @@ function drawGrid(grid) {
         else if (grid[i][j] == 'd'){
           if (gridCheck(grid, i, j, "d")) {
             placeTile(i, j, 10, 23);
-            drawContextDungeon(grid, i, j, "d", 5, 25 + floor(random() * 3));
+            drawContextDungeon(grid, i, j, "d", 15, 25 + floor(random() * 3));
           } else {
             //drawContext(grid, i, j, "_", 0, 0);
           }
@@ -668,9 +685,60 @@ function draw() {
     }
   }
   else {
+
+    if (currentGrid[monsterY/16][monsterX/16] == "d"){
+      let r = floor(millis()%4)
+
+      let r1 = rooms[floor(millis()%rooms.length)]
+      let r2 = rooms[floor(millis()%rooms.length)]
+
+      if (r == 0){
+        monsterX = r1.x * 16 + floor(r1.width/2)*16
+        monsterY = r2.y * 16 + 16
+      }
+      else  if (r == 1) {
+        monsterX = r1.x * 16 + floor(r1.width)*16 - 16
+        monsterY = r2.y * 16 + floor(r2.height/2)*16
+      }
+      else if (r == 2) {
+        monsterX = r1.x * 16 + floor(r1.width/2)*16
+        monsterY = r2.y * 16 + floor(r2.height)*16 - 16
+      }
+      else {
+        monsterX = r1.x * 16 + 16
+        monsterY = r2.y * 16 + floor(r2.height/2)*16
+      }
+    }
+
+
+    for (let i = 0; i < numRows; i++) {
+      for (let j = 0; j < numCols; j++) {
+        
+      }
+    }
     
+
+    fill(0, 255, 0);
+    ellipse(monsterX + 8, monsterY + 8, 12 + random() * 4, 8 + random() * 4 + sin(millis()*0.002) * 4)
+    fill(0,0,0)
+    ellipse(monsterX + 5, monsterY + 5, 2 + random() * 3, 3 + random() * 6)
+    ellipse(monsterX + 10, monsterY + 5, 2 + random() * 3, 3 + random() * 6)
   }
-  
+}
+
+function keyPressed() {
+  // Check which key was pressed and move the monster accordingly
+  if (map == 1){
+    if ((keyCode === UP_ARROW || key === 'w' || key === 'W') && currentGrid[(monsterY/16) - 1][monsterX/16] != "+") {
+      monsterY -= 16;
+    } else if ((keyCode === DOWN_ARROW || key === 's' || key === 'S') && currentGrid[(monsterY/16) + 1][monsterX/16] != "+") {
+      monsterY += 16;
+    } else if ((keyCode === LEFT_ARROW || key === 'a' || key === 'A') && currentGrid[monsterY/16][(monsterX/16) - 1] != "+") {
+      monsterX -= 16;
+    } else if ((keyCode === RIGHT_ARROW || key === 'd' || key === 'D') && currentGrid[monsterY/16][(monsterX/16) + 1] != "+") {
+      monsterX += 16;
+    }
+  }
 }
 
 function placeTile(i, j, ti, tj) {
