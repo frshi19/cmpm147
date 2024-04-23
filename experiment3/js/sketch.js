@@ -328,7 +328,7 @@ function generateGrid(numCols, numRows) {
             row.push(".");
           }
         }
-        else if (n >= 400 && n < 650) {
+        else if (n >= 400 && n < 600) {
           if (n >= 500 && n < 502) {
             row.push("H")
           }
@@ -336,7 +336,7 @@ function generateGrid(numCols, numRows) {
             row.push("_");
           }
         }
-        else if (n >= 650){
+        else if (n >= 600){
           row.push("W")
         }
       }
@@ -419,11 +419,11 @@ function drawGrid(grid) {
           }
           else if (grid[i][j] == "W"){
             if (gridCheck(grid, i, j, "W")) {
-              if (random(1) < 0.95) {
+              if (random() < 0.80) {
                 placeTile(i, j, 0, 13);
               }
               else {
-                placeTile(i, j, 1 + floor(random(3)), 13);
+                placeTile(i, j, 1 + floor((random() * 3 + millis() * 0.002) % 3), 13);
               }
               drawContext(grid, i, j, "W", 0, 13);
             } else {
@@ -486,11 +486,11 @@ function drawGrid(grid) {
           }
           else if (grid[i][j] == "W"){
             if (gridCheck(grid, i, j, "W")) {
-              if (random(1) < 0.95) {
+              if (random(1) < 0.90) {
                 placeTile(i, j, 0, 14);
               }
               else {
-                placeTile(i, j, 1 + floor(random(3)), 14);
+                placeTile(i, j, 1 + floor((random() * 3 + millis() * 0.002) % 3), 14);
               }
               drawContextNight(grid, i, j, "W", 0, 14);
             } else {
@@ -649,8 +649,22 @@ function draw() {
     } else {
       currentColor = lerpColor(nightColor, defaultColorNight, (millis() % 2000) / 2000);
     }
-  
+
     background(currentColor)
+
+    
+    if (millis() % 12000 > 7000 && millis() % 12000 < 11000) {
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          if (currentGrid[i][j] == "H") {
+            fill(255, 255, 150, 50)
+            ellipse(j * 16 + 8, i * 16 + 8, 32, 32)
+            fill(255, 255, 150, 50)
+            ellipse(j * 16 + 8, i * 16 + 8, 48, 48)
+          }
+        }
+      }
+    }
   }
   else {
     
