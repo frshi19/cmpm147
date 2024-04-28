@@ -47,20 +47,65 @@ function p3_drawBefore() {}
 function p3_drawTile(i, j) {
   noStroke();
 
-  if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
-    fill(240, 200);
-  } else {
-    fill(255, 200);
+  if (XXH.h32("tile:" + [i, j], worldSeed) % 100 <= 0) {
+    // mouth
+    fill(255, 0, 0, 255);
+    beginShape();
+    vertex(-tw, 0);
+    vertex(0, th);
+    vertex(tw, 0);
+    vertex(0, -th);
+    endShape(CLOSE);
+
+    fill(125, 0, 0, 255);
+    ellipse(tw - p3_tileWidth(), th - p3_tileHeight() * 2, 64, 64)
+    fill(0, 0, 0, 255);
+    ellipse(tw - p3_tileWidth(), th - p3_tileHeight() * 2, 56, 56)
+    fill (255, 255, 255, 255)
+    for (let a = 0; a < 128; a += 8){
+        if (a <= 64) {
+            triangle(-tw - 4 + a, -th * 3, -tw + a, -th * 3, -tw -2 + a, -th)
+        }
+        else {
+            triangle(-tw - 4 + a - 64, th * 3, -tw + a - 64, th * 3, -tw - 2 + a - 64, -th)
+        }
+    }
+
+  } else if (XXH.h32("tile:" + [i, j], worldSeed) % 100 <= 1){
+    // eyeballs
+    fill(125, 0, 0, 255);
+    beginShape();
+    vertex(-tw, 0);
+    vertex(0, th);
+    vertex(tw, 0);
+    vertex(0, -th);
+    endShape(CLOSE);
+    ellipse(tw - p3_tileWidth(), th - p3_tileHeight() * 2, 64, 64)
+    fill(255, 255, 255, 255);
+    ellipse(tw - p3_tileWidth(), th - p3_tileHeight() * 2, 60, 96 * abs(max(min(sin(millis() * 0.002), .5), -.5)))
+    
+    if (abs (max(min(sin(millis() * 0.002), .5), -.5)) > .1) {
+        fill(0, 0, 0, 255);
+        ellipse(tw - p3_tileWidth(), th - p3_tileHeight() * 2, 16, 16)
+    }
+    
+    
+
+  } 
+  else {
+    // FLESH
+    fill(255, 0, 0, 255);
+    beginShape();
+    vertex(-tw, 0);
+    vertex(0, th);
+    vertex(tw, 0);
+    vertex(0, -th);
+    endShape(CLOSE);
   }
 
   push();
 
-  beginShape();
-  vertex(-tw, 0);
-  vertex(0, th);
-  vertex(tw, 0);
-  vertex(0, -th);
-  endShape(CLOSE);
+
 
   let n = clicks[[i, j]] | 0;
   if (n % 2 == 1) {
