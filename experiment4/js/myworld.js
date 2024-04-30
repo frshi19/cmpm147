@@ -24,6 +24,7 @@ function p3_worldKeyChanged(key) {
   worldSeed = XXH.h32(key, 0);
   noiseSeed(worldSeed);
   randomSeed(worldSeed);
+  Object.keys(clicks).forEach(key => delete clicks[key]);
 }
 
 function p3_tileWidth() {
@@ -39,7 +40,22 @@ let clicks = {};
 
 function p3_tileClicked(i, j) {
   let key = [i, j];
-  clicks[key] = 1 + (clicks[key] | 0);
+  if(map == 0){
+
+  }
+  else if (map == 1){
+    clicks[key] = 1 + (clicks[key] | 0);
+    if(clicks[key] % 2 == 1){
+
+    }
+    else {
+
+    }
+  }
+  else {
+
+  }
+  
 }
 
 function p3_drawBefore() {}
@@ -117,27 +133,52 @@ function p3_drawTile(i, j) {
 
     if(j > -3 && j <= 3){
       if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
-        fill(30, 255);
-        beginShape();
-        vertex(-tw, 0);//LEFT
-        vertex(0, th); //DOWN
-        vertex(tw, 0); //RIGHT
-        vertex(0, -th);//UP
-        endShape(CLOSE);
-        fill(15, 255);
-        beginShape();
-        vertex(tw, 0); 
-        vertex(tw, 20);
-        vertex(0, th + 20); 
-        vertex(0, th);
-        endShape(CLOSE);
-        fill(0, 255);
-        beginShape();
-        vertex(0, th);
-        vertex(0, th + 20);
-        vertex(-tw, +20);
-        vertex(-tw, 0);
-        endShape(CLOSE);
+        if(clicks[[i,j]]%2==1){
+          fill(30, 255);
+          beginShape();
+          vertex(-tw, 0 + 10);//LEFT
+          vertex(0, th + 10); //DOWN
+          vertex(tw, 0 + 10); //RIGHT
+          vertex(0, -th + 10);//UP
+          endShape(CLOSE);
+          fill(15, 255);
+          beginShape();
+          vertex(tw, 0 + 10); 
+          vertex(tw, 20 + 10);
+          vertex(0, th + 20 + 10); 
+          vertex(0, th + 10);
+          endShape(CLOSE);
+          fill(0, 255);
+          beginShape();
+          vertex(0, th + 10);
+          vertex(0, th + 20 + 10);
+          vertex(-tw, +20 + 10);
+          vertex(-tw, 0 + 10);
+          endShape(CLOSE);
+        }
+        else{
+          fill(30, 255);
+          beginShape();
+          vertex(-tw, 0);//LEFT
+          vertex(0, th); //DOWN
+          vertex(tw, 0); //RIGHT
+          vertex(0, -th);//UP
+          endShape(CLOSE);
+          fill(15, 255);
+          beginShape();
+          vertex(tw, 0); 
+          vertex(tw, 20);
+          vertex(0, th + 20); 
+          vertex(0, th);
+          endShape(CLOSE);
+          fill(0, 255);
+          beginShape();
+          vertex(0, th);
+          vertex(0, th + 20);
+          vertex(-tw, +20);
+          vertex(-tw, 0);
+          endShape(CLOSE);
+        }
       } else {
         fill(255, 255);
         beginShape();
@@ -169,13 +210,6 @@ function p3_drawTile(i, j) {
     
 
     let n = clicks[[i, j]] | 0;
-    if (n % 2 == 1) {
-      fill(0, 0, 0, 32);
-      ellipse(0, 0, 10, 5);
-      translate(0, -10);
-      fill(255, 255, 100, 128);
-      ellipse(0, 0, 10, 10);
-    }
 
     pop();
   }
