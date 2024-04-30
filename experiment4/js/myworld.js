@@ -25,6 +25,10 @@ let releaseTime = 0.5;
 let env = new p5.Envelope();
 let triOsc = new p5.Oscillator('triangle');
 
+let scale;
+let smooth;
+let brightness;
+
 function playEnv() {
   // ensure that audio is enabled
   userStartAudio();
@@ -160,11 +164,11 @@ function p3_tileClicked(i, j) {
       }, 500)
     }
     else {
-
+      // map 2
     }
   }
   else {
-
+    clicks[key] = 1 + (clicks[key] | 0);
   }
   
 }
@@ -329,28 +333,55 @@ function p3_drawTile(i, j) {
     noStroke();
 
     if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
-      fill(240, 200);
+
     } else {
-      fill(255, 200);
+
     }
 
     push();
 
+    scale = 100 + 100 * noise(worldSeed)
+    smooth = 0.1 + 0.3 * noise(worldSeed)
+    brightness = max(min(mouseX, width*3/4),width/4)/width*1.5
+    
+
+    fill(140 * brightness, 180 * brightness, 50 * brightness);
     beginShape();
-    vertex(-tw, 0);
-    vertex(0, th);
-    vertex(tw, 0);
-    vertex(0, -th);
+    vertex(-tw, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);//LEFT
+    vertex(0, th + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale); //DOWN
+    vertex(tw, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale); //RIGHT
+    vertex(0, -th + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);//UP
+    endShape(CLOSE);
+    fill(120 * brightness, 160 * brightness, 30 * brightness);
+    beginShape();
+    vertex(tw, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale); 
+    vertex(tw, 40 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    vertex(0, th + 40 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale); 
+    vertex(0, th + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    endShape(CLOSE);
+    fill (100 * brightness, 140 * brightness, 10 * brightness);
+    beginShape();
+    vertex(0, th + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    vertex(0, th + 40 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    vertex(-tw, + 40 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    vertex(-tw, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
     endShape(CLOSE);
 
     let n = clicks[[i, j]] | 0;
-    if (n % 2 == 1) {
-      fill(0, 0, 0, 32);
-      ellipse(0, 0, 10, 5);
-      translate(0, -10);
-      fill(255, 255, 100, 128);
-      ellipse(0, 0, 10, 10);
-    }
+  if (n % 2 == 1) {
+    // noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale
+    fill(81  *brightness,57 * brightness,26 * brightness)
+    beginShape();
+    vertex(-5, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale)
+    vertex(5, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale)
+    vertex(5, -50 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale)
+    vertex(-5, -50 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale)
+    endShape(CLOSE)
+
+    fill(60 *brightness, 84 * brightness, 26 * brightness, 200)
+    ellipse(0, -50 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale, 25 + noise(i,j) * 25, 40 + noise(i*0.4,j*0.4) * 10)
+    
+  }
 
     pop();
   }
@@ -377,7 +408,20 @@ function p3_drawSelectedTile(i, j) {
     text("tile " + [i, j], 0, 0);
   }
   else {
-    
+    // map 2
+    noFill();
+    stroke(0, 120, 255, 128);
+
+    beginShape();
+    vertex(-tw, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    vertex(0, th + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    vertex(tw, 0 + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    vertex(0, -th + noise(i * smooth,j * smooth)*scale/2 - noise(i * smooth,j * smooth)*scale);
+    endShape(CLOSE);
+
+    noStroke();
+    fill(0);
+    text("tile " + [i, j], 0, 0);
   }
   
 }

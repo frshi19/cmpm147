@@ -15,9 +15,10 @@ let camera_offset;
 let camera_velocity;
 
 //change default here
-let map = 0;
+let map = 2;
 
 function remap() {
+  reset()
   if (map == 0) {
     map = 1;
   }
