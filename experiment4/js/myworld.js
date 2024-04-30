@@ -14,6 +14,30 @@
     p3_drawAfter
 */
 
+let attackLevel = 1.0;
+let releaseLevel = 0;
+
+let attackTime = 0.001;
+let decayTime = 0.2;
+let susPercent = 0.2;
+let releaseTime = 0.5;
+
+let env = new p5.Envelope();
+let triOsc = new p5.Oscillator('triangle');
+
+function playEnv() {
+  // ensure that audio is enabled
+  userStartAudio();
+
+  env.setADSR(attackTime, decayTime, susPercent, releaseTime);
+  env.setRange(attackLevel, releaseLevel);
+  env.play();
+}
+
+function release(i, j) {
+  clicks[[i,j]] = 0;
+}
+
 function p3_preload() {}
 
 function p3_setup() {}
@@ -24,6 +48,10 @@ function p3_worldKeyChanged(key) {
   worldSeed = XXH.h32(key, 0);
   noiseSeed(worldSeed);
   randomSeed(worldSeed);
+  reset()
+}
+
+function reset(){
   Object.keys(clicks).forEach(key => delete clicks[key]);
 }
 
@@ -43,10 +71,94 @@ function p3_tileClicked(i, j) {
   if(map == 0){
 
   }
-  else if (map == 1){
+  else if (map == 1 && XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0 && j > -3 && j <= 3 && (clicks[[i,j]] % 2 != 1)){
+    //piano
     clicks[key] = 1 + (clicks[key] | 0);
     if(clicks[key] % 2 == 1){
+      let timbre;
+      let t = (XXH.h32(worldSeed * 666 , worldSeed * 666));
+      if(t%4==0){
+        timbre = 'triangle'
+      }
+      else if(t%4==1){
+        timbre = 'sawtooth'
+      }
+      else if(t%4==2){
+        timbre = "square"
+      }
+      else if(t%4==3){
+        timbre = "sine"
+      }
+      triOsc.setType(timbre)
+      triOsc.amp(env);
+      let f1;
+      let fundamental = XXH.h32(worldSeed , worldSeed);
+      if (fundamental % 12 == 0) {
+        f1 = 261.63
+      }
+      else if (fundamental % 12 == 1){
+        f1 = 277.18
+      }
+      else if (fundamental % 12 == 2){
+        f1 = 293.66;
+      }
+      else if (fundamental % 12 == 3){
+          f1 = 311.13;
+      }
+      else if (fundamental % 12 == 4){
+          f1 = 329.63;
+      }
+      else if (fundamental % 12 == 5){
+          f1 = 349.23;
+      }
+      else if (fundamental % 12 == 6){
+          f1 = 369.99;
+      }
+      else if (fundamental % 12 == 7){
+          f1 = 391.99;
+      }
+      else if (fundamental % 12 == 8){
+          f1 = 415.30;
+      }
+      else if (fundamental % 12 == 9){
+          f1 = 440.00;
+      }
+      else if (fundamental % 12 == 10){
+          f1 = 466.16;
+      }
+      else if (fundamental % 12 == 11){
+          f1 = 493.88;
+      }
+      let f2;
+      let factor = XXH.h32("tile:" + [i * 666, j  * 666], worldSeed);
+      console.log(factor)
+      if (factor % 8 == 0) {
+        f2 = 1;
+      } else if (factor % 8 == 1) {
+        f2 = 1.125;
+      } else if (factor % 8 == 2) {
+        f2 = 1.25;
+      } else if (factor % 8 == 3) {
+        f2 = 1.333;
+      } else if (factor % 8 == 4) {
+        f2 = 1.5;
+      } else if (factor % 8 == 5) {
+        f2 = 1.667;
+      } else if (factor % 8 == 6) {
+        f2 = 1.875;
+      } else if (factor % 8 == 7) {
+        f2 = 2;
+      }
+      
 
+      triOsc.freq(f1 * f2);
+      triOsc.start();
+
+      playEnv();
+      
+      setTimeout(function() {
+        release(i, j)
+      }, 500)
     }
     else {
 
