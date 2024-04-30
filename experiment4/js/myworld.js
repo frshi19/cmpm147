@@ -45,7 +45,8 @@ function p3_tileClicked(i, j) {
 function p3_drawBefore() {}
 
 function p3_drawTile(i, j) {
-  randomSeed(worldSeed)
+  if(map == 0){
+    randomSeed(worldSeed)
   noStroke();
 
   if (XXH.h32("tile:" + [i, j], worldSeed) % 100 <= 0) {
@@ -120,6 +121,8 @@ function p3_drawTile(i, j) {
   }
 
   pop();
+  }
+  
 }
 
 function p3_drawSelectedTile(i, j) {

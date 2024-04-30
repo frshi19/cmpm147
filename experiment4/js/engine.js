@@ -14,6 +14,20 @@ let tile_rows, tile_columns;
 let camera_offset;
 let camera_velocity;
 
+let map = 0;
+
+function remap() {
+  if (map == 0) {
+    map = 1;
+  }
+  else if(map == 1){
+    map = 2;
+  }
+  else {
+    map = 0;
+  }
+}
+
 /////////////////////////////
 // Transforms between coordinate systems
 // These are actually slightly weirder than in full 3d...
@@ -83,6 +97,8 @@ function setup() {
   });
 
   createP("Arrow keys scroll. Clicking changes tiles.").parent("container");
+
+  select("#next").mousePressed(remap);
 
   rebuildWorld(input.value());
 }
