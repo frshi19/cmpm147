@@ -14,7 +14,7 @@ let tile_rows, tile_columns;
 let camera_offset;
 let camera_velocity;
 
-let map = 0;
+let map = 1;
 
 function remap() {
   if (map == 0) {
@@ -154,7 +154,14 @@ function draw() {
   );
   let world_offset = cameraToWorldOffset([camera_offset.x, camera_offset.y]);
 
-  background(72, 18, 24);
+  if(map == 0){
+    background(72, 18, 24);
+  }else if (map == 1) {
+    background(72, 176, 255);
+  }else {
+
+  }
+  
 
   if (window.p3_drawBefore) {
     window.p3_drawBefore();
