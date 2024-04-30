@@ -14,7 +14,8 @@ let tile_rows, tile_columns;
 let camera_offset;
 let camera_velocity;
 
-let map = 1;
+//change default here
+let map = 0;
 
 function remap() {
   if (map == 0) {

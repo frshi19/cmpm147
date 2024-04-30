@@ -131,7 +131,6 @@ function p3_tileClicked(i, j) {
       }
       let f2;
       let factor = XXH.h32("tile:" + [i * 666, j  * 666], worldSeed);
-      console.log(factor)
       if (factor % 8 == 0) {
         f2 = 1;
       } else if (factor % 8 == 1) {
