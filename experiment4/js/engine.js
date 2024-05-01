@@ -78,7 +78,7 @@ function preload() {
 }
 
 function setup() {
-  let canvas = createCanvas(800, 400);
+  let canvas = createCanvas(950, 450);
   canvas.parent("container");
 
   camera_offset = new p5.Vector(-width / 2, height / 2);
@@ -98,12 +98,42 @@ function setup() {
     rebuildWorld(input.value());
   });
 
-  createP("Arrow keys scroll. Clicking changes tiles.").parent("container");
-
+  let description = createP("Arrow keys scroll. Clicking changes tiles.");
+description.parent("container");
+description.style("font-size", "1.5em"); // Adjust font size as needed
   select("#next").mousePressed(remap);
 
   rebuildWorld(input.value());
 }
+function remap() {
+    reset();
+    map = (map + 1) % 3; // Cycle through 0, 1, 2
+    changeBackgroundColor(map);
+    changeSubtitle(map);
+  }
+  
+  function changeBackgroundColor(colorNumber) {
+    let backgroundColor;
+    if (colorNumber == 0) {
+      backgroundColor = "rgb(224,166,147)";
+    } else if (colorNumber == 1) {
+      backgroundColor = "rgb(28,70,102)";
+    } else {
+      backgroundColor = "rgb(198,178,153)";
+    }
+    $('body').css('background-color', backgroundColor);
+  }
+  function changeSubtitle(generator) {
+    let subtitle;
+    if (generator == 0) {
+      subtitle = "wall of flesh";
+    } else if (generator == 1) {
+      subtitle = "infinite piano";
+    } else {
+      subtitle = "windows xp";
+    }
+    $('#subtitle').text(subtitle);
+  }
 
 function rebuildWorld(key) {
   if (window.p3_worldKeyChanged) {
