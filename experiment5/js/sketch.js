@@ -47,6 +47,7 @@ function setup() {
   image(currentInspiration.image, 0,0, width, height);
   loadPixels();
   currentInspirationPixels = pixels;
+  background(255)
 }
 
 function evaluate() {

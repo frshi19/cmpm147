@@ -29,7 +29,7 @@ function initDesign(inspiration) {
     fg: []
   }
   // i = number of shapes
-  for(let i = 0; i < 8000; i++) {
+  for(let i = 0; i < 1000; i++) {
     design.fg.push({x: random(width),
                     y: random(height),
                     w: random(width/16),
@@ -41,13 +41,13 @@ function initDesign(inspiration) {
 
 function renderDesign(design, inspiration) {
   
-  background(design.bg);
+  //background(design.bg);
   noStroke();
   for(let box of design.fg) {
     let c = currentInspiration.image.get(box.x, box.y)
     fill(c[0], c[1], c[2], box.op);
     if (inspiration.name == "Einstein") {
-        rect(box.x, box.y, box.w, box.h);
+        rect(box.x - box.w/2, box.y-box.h/2, box.w, box.h);
     }
     else if (inspiration.name == "Wanderer above the Sea of Fog"){
         ellipse(box.x, box.y, box.w, box.h);
