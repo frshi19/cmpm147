@@ -4,42 +4,37 @@
 function getInspirations() {
   return [
     {
-      name: "Lunch atop a Skyscraper", 
-      assetUrl: "https://cdn.glitch.global/3abd0223-86fb-43ce-a00a-fde12615bcd5/lunch-on-a-skyscraper.jpg?v=1714798266994",
-      credit: "Lunch atop a Skyscraper, Charles Clyde Ebbets, 1932"
+      name: "Einstein", 
+      assetUrl: "https://cdn.glitch.global/d0012612-7df5-469d-aff0-37b23c1ee026/Einstein_tongue.jpg?v=1714964241963",
+      credit: "The famous image of Einstein taken by United Press, Arthur Sasse, 1951"
     },
     {
-      name: "Train Wreck", 
-      assetUrl: "https://cdn.glitch.global/3abd0223-86fb-43ce-a00a-fde12615bcd5/train-wreck.jpg?v=1714798264965",
-      credit: "Train Wreck At Monteparnasse, Levy & fils, 1895"
+      name: "Wanderer above the Sea of Fog", 
+      assetUrl: "https://cdn.glitch.global/d0012612-7df5-469d-aff0-37b23c1ee026/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpg?v=1714973221056",
+      credit: "Wanderer above the Sea of Fog, Caspar David Friedrich, 1818"
     },
     {
-      name: "Migrant mother", 
-      assetUrl: "https://cdn.glitch.global/3abd0223-86fb-43ce-a00a-fde12615bcd5/migrant-mother.jpg?v=1714778906791",
-      credit: "Migrant Mother near Nipomo, California, Dorothea Lange, 1936"
-    },
-    {
-      name: "Disaster Girl", 
-      assetUrl: "https://cdn.glitch.global/3abd0223-86fb-43ce-a00a-fde12615bcd5/girl-with-fire.jpg?v=1714778905663",
-      credit: "Four-year-old Zoë Roth, 2005"
-    },
+      name: "The Great Wave off Kanagawa", 
+      assetUrl: "https://cdn.glitch.global/d0012612-7df5-469d-aff0-37b23c1ee026/Tsunami_by_hokusai_19th_century.jpg?v=1714973221457",
+      credit: "The Great Wave off Kanagawa, Katsushika Hokusai, 1831"
+    }
   ];
 }
 
 function initDesign(inspiration) {
-  resizeCanvas(inspiration.image.width / 2, inspiration.image.height / 2);
+  resizeCanvas(inspiration.image.width, inspiration.image.height);
   
   let design = {
     bg: 128,
     fg: []
   }
-  
-  for(let i = 0; i < 100; i++) {
+  // i = number of shapes
+  for(let i = 0; i < 8000; i++) {
     design.fg.push({x: random(width),
                     y: random(height),
-                    w: random(width/2),
-                    h: random(height/2),
-                    fill: random(255)})
+                    w: random(width/16),
+                    h: random(height/16),
+                    op: random(255)})
   }
   return design;
 }
@@ -49,23 +44,32 @@ function renderDesign(design, inspiration) {
   background(design.bg);
   noStroke();
   for(let box of design.fg) {
-    fill(box.fill, 128);
-    rect(box.x, box.y, box.w, box.h);
+    let c = currentInspiration.image.get(box.x, box.y)
+    fill(c[0], c[1], c[2], box.op);
+    if (inspiration.name == "Einstein") {
+        rect(box.x, box.y, box.w, box.h);
+    }
+    else if (inspiration.name == "Wanderer above the Sea of Fog"){
+        ellipse(box.x, box.y, box.w, box.h);
+    }
+    else {
+        triangle(box.x, box.y - box.h/2, box.x - box.w/2, box.y + box.h/2, box.x + box.w/2, box.y + box.h/2)
+    }
   }
 }
 
 function mutateDesign(design, inspiration, rate) {
   design.bg = mut(design.bg, 0, 255, rate);
   for(let box of design.fg) {
-    box.fill = mut(box.fill, 0, 255, rate);
+    box.op = mut(box.op, 0, 255, rate);
     box.x = mut(box.x, 0, width, rate);
     box.y = mut(box.y, 0, height, rate);
-    box.w = mut(box.w, 0, width/2, rate);
-    box.h = mut(box.h, 0, height/2, rate);
+    box.w = mut(box.w, 0, width/16, rate);
+    box.h = mut(box.h, 0, height/16, rate);
   }
 }
 
 
 function mut(num, min, max, rate) {
-    return constrain(randomGaussian(num, (rate * (max - min)) / 10), min, max);
+    return constrain(randomGaussian(num, (rate * (max - min)) / 20), min, max);
 }
