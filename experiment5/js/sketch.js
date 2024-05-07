@@ -111,4 +111,5 @@ function draw() {
   }
   
   fpsCounter.innerHTML = Math.round(frameRate());
+  
 }
